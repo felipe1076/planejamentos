@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="48" fill="#0f172a" stroke="#f59e0b" stroke-width="2" />
+    <path d="M30 40 L50 30 L70 40 L70 60 L50 70 L30 60 Z" fill="none" stroke="#f59e0b" stroke-width="2" />
+    <path d="M35 45 L50 38 L65 45 M35 55 L50 48 L65 55" fill="none" stroke="white" stroke-width="1.5" />
+    <text x="50" y="85" text-anchor="middle" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="bold">SEMED ALTOS</text>
+    <path d="M40 48 L50 42 L60 48" fill="none" stroke="#f59e0b" stroke-width="1" />
+</svg>
