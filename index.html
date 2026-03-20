@@ -3,72 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEMED Altos - Sistema de Planejamento Escolar</title>
+    <title>Sistema de Planejamento SEMED - Altos</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Scripts for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <!-- Flatpickr for Date Range Selection -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
 </head>
 <body>
     <div class="app-container">
-        <header class="main-header">
+        <!-- 1. IDENTIFICAÇÃO E CABEÇALHO (Official Theme) -->
+        <header class="main-header official">
             <div class="header-logo-container">
-                <img src="semed_altos_logo.svg" alt="SEMED Altos Logo" class="header-logo" id="logo-semed">
-                <div class="header-titles">
-                    <h1>Sistema de Planejamento Escolar</h1>
-                    <p>SEMED Altos - Gestão Pedagógica</p>
+                <div class="logo-wrapper">
+                    <img src="semed_altos_logo.svg" alt="SEMED Altos Logo" class="header-logo" id="logo-semed">
+                    <input type="file" id="upload-logo-semed" accept="image/*" style="display: none;">
+                    <label for="upload-logo-semed" class="change-logo-btn">Trocar Logo</label>
                 </div>
-                <img src="zeca_marinha_logo.svg" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
+                <div class="header-titles official-titles">
+                    <h2>SECRETARIA MUNICIPAL DE EDUCAÇÃO - SEMED</h2>
+                    <h3>COORDENAÇÃO DE ENSINO 6º AO 9º ANO</h3>
+                    <h4>COMPONENTE CURRICULAR: <input type="text" id="componente" value="PROJETOS INTEGRADORES" placeholder="Componente Curricular"></h4>
+                </div>
+                <div class="logo-wrapper">
+                    <img src="zeca_marinha_logo.svg" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
+                    <input type="file" id="upload-logo-escola" accept="image/*" style="display: none;">
+                    <label for="upload-logo-escola" class="change-logo-btn">Trocar Logo</label>
+                </div>
+            </div>
+            
+            <div class="banners-section">
+                <div class="green-banner">
+                    <input type="text" id="planejamento-titulo" value="I PLANEJAMENTO MENSAL PROJETOS INTEGRADORES DO 6º AO 9º ANO">
+                    <input type="text" id="periodo" value="PERÍODO: 09/02 A 23/03 DE 2026">
+                </div>
+                <div class="green-banner eixo-banner">
+                    <label>EIXO INTEGRADOR - </label>
+                    <input type="text" id="eixo" value="Perfil do Estudante: Identidade, Pertencimento, Convivência e Organização da Vida Escolar">
+                </div>
+                <div class="blue-banner formador-row">
+                    <div class="form-item">
+                        <label>FORMADOR:</label>
+                        <input type="text" id="coordenador" value="Elizete Nunes da Silva">
+                    </div>
+                    <div class="form-item">
+                        <label>PROFESSOR:</label>
+                        <input type="text" id="professor" placeholder="Nome do Professor">
+                    </div>
+                    <div class="form-item">
+                        <label>TURMA(S):</label>
+                        <input type="text" id="turmas" placeholder="Ex: 6º AO 9º ANO">
+                    </div>
+                </div>
             </div>
         </header>
 
         <main class="content-wrapper">
-            <!-- 1. IDENTIFICAÇÃO E CABEÇALHO -->
-            <section class="card form-section" id="identificacao">
-                <div class="card-header">
-                    <span class="icon">📝</span>
-                    <h2>Identificação e Cabeçalho</h2>
-                </div>
-                <div class="grid-form">
-                    <div class="form-group full-width">
-                        <label for="professor">Professor(a)</label>
-                        <input type="text" id="professor" placeholder="Nome completo do professor(a)">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="turmas">Turma(s)</label>
-                        <input type="text" id="turmas" placeholder="Ex: 6º, 7º, 8º e 9º Ano">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="componente">Componente Curricular</label>
-                        <input type="text" id="componente" placeholder="Ex: Projetos Integradores">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="coordenador">Formador/Coordenador</label>
-                        <input type="text" id="coordenador" placeholder="Nome do coordenador">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="periodo">Período</label>
-                        <input type="text" id="periodo" placeholder="Ex: 09/02 a 23/03 de 2026">
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="eixo">Eixo Integrador</label>
-                        <textarea id="eixo" rows="2">Perfil do Estudante: Identidade, Pertencimento, Convivência e Organização da Vida Escolar</textarea>
-                    </div>
-                </div>
-            </section>
-
             <!-- 2. TABELA DE PLANEJAMENTO SEMANAL -->
             <section class="card table-builder-section" id="planejamento">
                 <div class="card-header">
@@ -80,18 +74,28 @@
                 </div>
                 
                 <div id="weeks-container" class="weeks-list">
-                    <!-- Week blocks will be added here via JS -->
+                    <!-- Week blocks added via JS -->
                 </div>
             </section>
 
             <!-- 4. AÇÃO DO BOTÃO -->
             <div class="action-container grid-buttons">
                 <button id="gerar-pdf-btn" class="btn-main">
-                    <span class="btn-icon">📄</span> PDF
+                    <span class="btn-icon">📄</span> GERAR PDF OFICIAL
                 </button>
                 <button id="gerar-word-btn" class="btn-main word">
-                    <span class="btn-icon">📝</span> WORD
+                    <span class="btn-icon">📝</span> GERAR WORD (DOC)
                 </button>
+            </div>
+
+            <div class="data-actions">
+                <button id="exportar-btn" class="btn-data">
+                    <span class="btn-icon">📤</span> Exportar Backup
+                </button>
+                <button id="importar-btn" class="btn-data">
+                    <span class="btn-icon">📥</span> Importar Backup
+                </button>
+                <input type="file" id="importar-input" accept=".json" style="display: none;">
             </div>
         </main>
 
@@ -100,12 +104,11 @@
         </footer>
     </div>
 
-    <!-- Template for Week Block -->
     <template id="week-template">
-        <div class="week-block glass">
+        <div class="week-block">
             <div class="week-header">
                 <h3>Semana <span class="week-num">1</span></h3>
-                <button class="remove-week-btn" title="Remover esta semana">×</button>
+                <button class="remove-week-btn" title="Remover">×</button>
             </div>
             <div class="week-grid">
                 <div class="form-group row">
@@ -115,32 +118,32 @@
                     </div>
                     <div class="col">
                         <label>INÍCIO</label>
-                        <input type="text" class="field-date-start" placeholder="Data Inicial">
+                        <input type="text" class="field-date-start" placeholder="Data">
                     </div>
                     <div class="col">
                         <label>FIM</label>
-                        <input type="text" class="field-date-end" placeholder="Data Final">
+                        <input type="text" class="field-date-end" placeholder="Data">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>HABILIDADES (BNCC)</label>
-                    <textarea class="field-habilidades" rows="3" placeholder="Códigos e descrições da BNCC"></textarea>
+                    <textarea class="field-habilidades" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>OBJETIVOS</label>
-                    <textarea class="field-objetivos" rows="3" placeholder="Lista de objetivos pedagógicos"></textarea>
+                    <textarea class="field-objetivos" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>OBJETO DO CONHECIMENTO</label>
-                    <textarea class="field-objetos" rows="3" placeholder="Conteúdos, temas e eixos"></textarea>
+                    <textarea class="field-objetos" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>METODOLOGIA</label>
-                    <textarea class="field-metodologia" rows="3" placeholder="Descrição detalhada das atividades"></textarea>
+                    <textarea class="field-metodologia" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>AVALIAÇÃO</label>
-                    <textarea class="field-avaliacao" rows="3" placeholder="Métodos de registro e observação"></textarea>
+                    <textarea class="field-avaliacao" rows="3"></textarea>
                 </div>
             </div>
         </div>

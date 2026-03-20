@@ -1,8 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="48" fill="#1e293b" stroke="#3b82f6" stroke-width="2" />
-    <path d="M30 65 L30 45 L50 30 L70 45 L70 65 Z" fill="#3b82f6" />
-    <path d="M45 65 L45 55 L55 55 L55 65" fill="white" />
-    <circle cx="50" cy="40" r="5" fill="#f59e0b" />
-    <text x="50" y="85" text-anchor="middle" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="7" font-weight="bold">ESCOLA ZECA DA MARINHA</text>
-    <rect x="40" y="65" width="20" height="2" fill="white" />
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150">
+    <rect width="100%" height="100%" fill="white"/>
+    <g transform="translate(10,10)">
+        <path d="M20,60 Q40,40 60,60 Q40,80 20,60 M60,60 Q80,40 100,60 Q80,80 60,60" fill="#fbb03b"/>
+        <path d="M25,55 Q40,30 55,55 L55,65 Q40,90 25,65 Z" fill="#29abe2"/>
+        <path d="M65,55 Q80,30 95,55 L95,65 Q80,90 65,65 Z" fill="#0071bc" opacity="0.8"/>
+        <text x="50" y="110" font-family="Arial, sans-serif" font-weight="900" font-size="16" fill="#1e3a66">ZECA DA MARINHA</text>
+        <text x="50" y="125" font-family="Arial, sans-serif" font-size="8" fill="#1e3a66" opacity="0.7">CENTRO MUNICIPAL DE FORMAÇÃO CONTINUADA</text>
+    </g>
 </svg>
