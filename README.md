@@ -1,4 +1,4 @@
-# Sistema de Planejamento Escolar (SEMED Altos)
+# Sistema de Planejamento Escolar
 
 Este é um sistema da web simples, moderno e eficiente para criar planejamentos semanais escolares com exportação direta para **PDF** e **Word**.
 
