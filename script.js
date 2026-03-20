@@ -11,31 +11,52 @@ function createWeek(data = null) {
     
     // Select fields
     const labelField = block.querySelector('.field-semana-label');
-    const startInput = block.querySelector('.field-date-start');
-    const endInput = block.querySelector('.field-date-end');
-    const habilidades = block.querySelector('.field-habilidades');
-    const objetivos = block.querySelector('.field-objetivos');
+    const eixo = block.querySelector('.field-eixo');
     const objetos = block.querySelector('.field-objetos');
+    const objetivos = block.querySelector('.field-objetivos');
     const metodologia = block.querySelector('.field-metodologia');
+    const recursos = block.querySelector('.field-recursos');
+    const adaptacoes = block.querySelector('.field-adaptacoes');
     const avaliacao = block.querySelector('.field-avaliacao');
+    const recuperacao = block.querySelector('.field-recuperacao');
 
     // Fill data if provided, otherwise default
     if (data) {
         labelField.value = data.label || "";
-        startInput.value = data.start || "";
-        endInput.value = data.end || "";
-        habilidades.value = data.habilidades || "";
-        objetivos.value = data.objetivos || "";
+        eixo.value = data.eixo || "";
         objetos.value = data.objetos || "";
+        objetivos.value = data.objetivos || "";
         metodologia.value = data.metodologia || "";
+        recursos.value = data.recursos || "";
+        adaptacoes.value = data.adaptacoes || "";
         avaliacao.value = data.avaliacao || "";
-    } else {
-        labelField.value = `${index}ª SEMANA`;
+        recuperacao.value = data.recuperacao || "";
     }
 
-    // Initialize Flatpickr
-    [startInput, endInput].forEach(inp => {
-        if (inp) flatpickr(inp, { dateFormat: "d/m", locale: "pt", onChange: saveData });
+    // Initialize Flatpickr for Range
+    flatpickr(labelField, { 
+        mode: "range", 
+        dateFormat: "d/m", 
+        locale: "pt", 
+        onChange: (selectedDates, dateStr) => {
+            if (selectedDates.length === 2) {
+                const start = selectedDates[0];
+                const end = selectedDates[1];
+                const startStr = start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+                const endStr = end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+                
+                // Format nicely: "10 a 12 de fevereiro"
+                if (start.getMonth() === end.getMonth()) {
+                    const month = startStr.split(' de ')[1];
+                    labelField.value = `${start.getDate()} a ${end.getDate()} de ${month}`;
+                } else {
+                    labelField.value = `${startStr} a ${endStr}`;
+                }
+            } else {
+                labelField.value = dateStr;
+            }
+            saveData(); 
+        } 
     });
 
     // Add save listener to all fields
@@ -65,18 +86,18 @@ addWeekBtn.onclick = () => {
 };
 
 // 2. Data Persistence (LocalStorage)
-const STORAGE_KEY = 'semed_planos_data';
+const STORAGE_KEY = 'semed_planos_data_v2'; // versioned key for new model
 
 function saveData() {
     const data = {
         header: {
             componente: document.getElementById('componente').value,
-            titulo: document.getElementById('planejamento-titulo').value,
-            periodo: document.getElementById('periodo').value,
-            eixo: document.getElementById('eixo').value,
-            coordenador: document.getElementById('coordenador').value,
+            duracao: document.getElementById('duracao').value,
+            turma: document.getElementById('turma').value,
+            turno: document.getElementById('turno').value,
+            escola: document.getElementById('escola').value,
             professor: document.getElementById('professor').value,
-            turmas: document.getElementById('turmas').value,
+            periodoGeral: document.getElementById('periodo-geral').value,
             logoSemed: logoSemedB64,
             logoEscola: logoEscolaB64
         },
@@ -86,13 +107,14 @@ function saveData() {
     weeksContainer.querySelectorAll('.week-block').forEach(block => {
         data.weeks.push({
             label: block.querySelector('.field-semana-label').value,
-            start: block.querySelector('.field-date-start').value,
-            end: block.querySelector('.field-date-end').value,
-            habilidades: block.querySelector('.field-habilidades').value,
-            objetivos: block.querySelector('.field-objetivos').value,
+            eixo: block.querySelector('.field-eixo').value,
             objetos: block.querySelector('.field-objetos').value,
+            objetivos: block.querySelector('.field-objetivos').value,
             metodologia: block.querySelector('.field-metodologia').value,
-            avaliacao: block.querySelector('.field-avaliacao').value
+            recursos: block.querySelector('.field-recursos').value,
+            adaptacoes: block.querySelector('.field-adaptacoes').value,
+            avaliacao: block.querySelector('.field-avaliacao').value,
+            recuperacao: block.querySelector('.field-recuperacao').value
         });
     });
 
@@ -112,12 +134,12 @@ function loadData() {
         // Populate Header
         if (data.header) {
             document.getElementById('componente').value = data.header.componente || "";
-            document.getElementById('planejamento-titulo').value = data.header.titulo || "";
-            document.getElementById('periodo').value = data.header.periodo || "";
-            document.getElementById('eixo').value = data.header.eixo || "";
-            document.getElementById('coordenador').value = data.header.coordenador || "";
+            document.getElementById('duracao').value = data.header.duracao || "";
+            document.getElementById('turma').value = data.header.turma || "";
+            document.getElementById('turno').value = data.header.turno || "";
+            document.getElementById('escola').value = data.header.escola || "";
             document.getElementById('professor').value = data.header.professor || "";
-            document.getElementById('turmas').value = data.header.turmas || "";
+            document.getElementById('periodo-geral').value = data.header.periodoGeral || "";
             
             if (data.header.logoSemed) {
                 logoSemedB64 = data.header.logoSemed;
@@ -147,7 +169,32 @@ document.querySelectorAll('.main-header input').forEach(el => {
     el.addEventListener('input', saveData);
 });
 
-// 3. Export / Import Backup
+// 3. Theme Management
+const themeBtn = document.getElementById('theme-btn');
+const themeDropdown = document.getElementById('theme-dropdown');
+
+themeBtn.onclick = (e) => {
+    e.stopPropagation();
+    themeDropdown.classList.toggle('show');
+};
+
+document.querySelectorAll('.theme-dropdown button').forEach(btn => {
+    btn.onclick = () => {
+        const theme = btn.getAttribute('data-theme');
+        setTheme(theme);
+        themeDropdown.classList.remove('show');
+    };
+});
+
+function setTheme(theme) {
+    document.body.className = theme === 'light' ? '' : `theme-${theme}`;
+    localStorage.setItem('semed_app_theme', theme);
+}
+
+// Close dropdown on click outside
+window.onclick = () => themeDropdown.classList.remove('show');
+
+// 3.1. Export / Import Backup (Footer)
 const exportBtn = document.getElementById('exportar-btn');
 const importBtn = document.getElementById('importar-btn');
 const importInput = document.getElementById('importar-input');
@@ -201,9 +248,12 @@ async function svgToBase64(svgString) {
             img.src = 'data:image/svg+xml;base64,' + svg64;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                canvas.width = 600; canvas.height = 300;
+                // Use a high resolution while keeping the original SVG aspect ratio
+                const scale = 2; 
+                canvas.width = img.width * scale; 
+                canvas.height = img.height * scale;
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, 600, 300);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 resolve(canvas.toDataURL('image/png'));
             };
             img.onerror = () => resolve("");
@@ -225,7 +275,6 @@ function setupUploader(inputId, imgId, side) {
                 document.getElementById(imgId).src = b64;
                 if (side === 'semed') logoSemedB64 = b64;
                 else logoEscolaB64 = b64;
-                // Save logos to localStorage too? The user might want persistence for logos.
                 saveData(); 
             };
             reader.readAsDataURL(file);
@@ -247,83 +296,87 @@ gerarPdfBtn.onclick = async () => {
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
         
         // Data Extraction
-        const prof = document.getElementById('professor').value || '/';
-        const turmas = document.getElementById('turmas').value || '/';
-        const componente = document.getElementById('componente').value || '/';
-        const coord = document.getElementById('coordenador').value || '/';
-        const periodoTxt = document.getElementById('periodo').value || '/';
-        const eixo = document.getElementById('eixo').value || '/';
-        const planejamentoTxt = document.getElementById('planejamento-titulo').value || '/';
+        const prof = document.getElementById('professor').value || '';
+        const turma = document.getElementById('turma').value || '';
+        const turno = document.getElementById('turno').value || '';
+        const duracao = document.getElementById('duracao').value || '';
+        const escola = document.getElementById('escola').value || '';
+        const componente = document.getElementById('componente').value || '';
+        const periodoTxt = document.getElementById('periodo-geral').value || '';
 
-        // 1. TOP SECTION: Logos and Text
-        if (logoSemedB64) doc.addImage(logoSemedB64, 'PNG', 15, 8, 30, 15);
-        if (logoEscolaB64) doc.addImage(logoEscolaB64, 'PNG', 252, 8, 30, 15);
+        // 1. TOP SECTION: Logos and Text (Preserving Aspect Ratio)
+        const semedImgEl = document.getElementById('logo-semed');
+        const escolaImgEl = document.getElementById('logo-escola');
+
+        if (logoSemedB64 && semedImgEl.naturalWidth) {
+            const ratio = semedImgEl.naturalHeight / semedImgEl.naturalWidth;
+            const h = 55 * ratio; // Fixed width 55mm
+            doc.addImage(logoSemedB64, 'PNG', 10, 8, 55, h);
+        }
+        if (logoEscolaB64 && escolaImgEl.naturalWidth) {
+            const ratio = escolaImgEl.naturalHeight / escolaImgEl.naturalWidth;
+            const h = 55 * ratio; // Fixed width 55mm
+            doc.addImage(logoEscolaB64, 'PNG', 232, 8, 55, h);
+        }
         
         doc.setFont('Helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('PREFEITURA MUNICIPAL DE ALTOS', 148, 12, { align: 'center' });
         doc.setFontSize(10);
-        doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO- SEMED', 148, 12, { align: 'center' });
-        doc.text('COORDENAÇÃO DE ENSINO 6º AO 9º ANO', 148, 17, { align: 'center' });
-        doc.text('COMPONENTE CURRICULAR: ' + componente, 148, 22, { align: 'center' });
-        doc.text('PROJETOS INTEGRADORES', 148, 27, { align: 'center' });
+        doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED', 148, 17, { align: 'center' });
+        doc.text('COMPONENTE CURRICULAR: ' + componente.toUpperCase(), 148, 22, { align: 'center' });
 
-        // 2. GREEN BANNERS
-        doc.setDrawColor(187, 247, 208); // border
-        doc.setFillColor(212, 237, 218); // green banner
-        
-        // Banner 1: Planejamento
-        doc.rect(15, 33, 267, 10, 'F');
-        doc.rect(15, 33, 267, 10, 'S');
+        // Metadata Rows
         doc.setFontSize(9);
-        doc.text(planejamentoTxt + ' ' + periodoTxt, 148, 39, { align: 'center' });
-
-        // Banner 2: Eixo
-        doc.rect(15, 45, 267, 8, 'F');
-        doc.rect(15, 45, 267, 8, 'S');
-        doc.text('EIXO INTEGRADOR - ' + eixo, 148, 50, { align: 'center' });
-
-        // 3. BLUE IDENTIFICATION BAND
-        doc.setDrawColor(191, 219, 254);
-        doc.setFillColor(204, 229, 255);
-        doc.rect(15, 55, 267, 10, 'F');
-        doc.rect(15, 55, 267, 10, 'S');
+        doc.text(`DURAÇÃO: ${duracao.toUpperCase()}`, 100, 30);
+        doc.text(`TURMA: ${turma.toUpperCase()}`, 145, 30);
+        doc.text(`TURNO: ${turno.toUpperCase()}`, 180, 30);
         
-        doc.setFontSize(9);
-        doc.text(`FORMADOR(A): ${coord}`, 18, 61);
-        doc.text(`PROFESSOR(A): ${prof}`, 130, 61);
-        doc.text(`TURMA: ${turmas}`, 235, 61);
+        doc.text(`ESCOLA: ${escola.toUpperCase()}`, 15, 36);
+        doc.text(`PROFESSOR (A): ${prof.toUpperCase()}`, 15, 42);
+
+        // PLANO DE AULA BANNER
+        doc.setFillColor(243, 232, 255); // Light Lilac
+        doc.setDrawColor(216, 180, 254); // Purple Border
+        doc.rect(15, 48, 267, 10, 'FD');
+        doc.setTextColor(88, 28, 135); // Dark Purple Text
+        doc.setFontSize(10);
+        doc.text(`- PLANO DE AULA -      ${periodoTxt.toUpperCase()}`, 148, 54.5, { align: 'center' });
+        doc.setTextColor(0); // Reset text color
 
         // 4. MAIN TABLE
         const tableRows = [];
         weeksContainer.querySelectorAll('.week-block').forEach(block => {
-            const label = block.querySelector('.field-semana-label').value;
-            const start = block.querySelector('.field-date-start').value;
-            const end = block.querySelector('.field-date-end').value;
-            const fullDateStr = label + '\n' + (start && end ? `${start} a ${end}` : (start || end ? start || end : ''));
             tableRows.push([
-                fullDateStr,
-                block.querySelector('.field-habilidades').value,
-                block.querySelector('.field-objetivos').value,
+                block.querySelector('.field-semana-label').value,
+                block.querySelector('.field-eixo').value,
                 block.querySelector('.field-objetos').value,
+                block.querySelector('.field-objetivos').value,
                 block.querySelector('.field-metodologia').value,
-                block.querySelector('.field-avaliacao').value
+                block.querySelector('.field-recursos').value,
+                block.querySelector('.field-adaptacoes').value,
+                block.querySelector('.field-avaliacao').value,
+                block.querySelector('.field-recuperacao').value
             ]);
         });
 
         doc.autoTable({
-            startY: 68,
-            head: [['DATAS', 'HABILIDADES', 'OBJETIVOS', 'OBJETO DO CONHECIMENTO', 'METODOLOGIA', 'AVALIAÇÃO']],
+            startY: 58,
+            head: [['Data', 'Eixo/\nTemática', 'Objeto do\nConhecimento', 'Objetivos', 'Estratégias\nMetodológicas', 'Recursos', 'Adaptações\nCurriculares', 'Avaliação', 'Recuperação']],
             body: tableRows,
             theme: 'grid',
             headStyles: { 
-                fillColor: [180, 200, 240], 
+                fillColor: [240, 240, 240], 
                 textColor: 0, 
                 fontStyle: 'bold', 
                 halign: 'center',
+                valign: 'middle',
                 lineWidth: 0.1,
-                lineColor: 0
+                lineColor: 0,
+                fontSize: 8
             },
             styles: { 
-                fontSize: 8, 
+                fontSize: 7.5, 
                 cellPadding: 2, 
                 overflow: 'linebreak',
                 valign: 'middle',
@@ -331,40 +384,49 @@ gerarPdfBtn.onclick = async () => {
                 lineColor: 0
             },
             columnStyles: { 
-                0: { cellWidth: 25, fontStyle: 'bold', halign: 'center' },
-                1: { cellWidth: 45 },
-                2: { cellWidth: 45 },
-                3: { cellWidth: 50 },
-                4: { cellWidth: 55 },
-                5: { cellWidth: 47 }
+                0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+                1: { cellWidth: 32 },
+                2: { cellWidth: 32 },
+                3: { cellWidth: 32 },
+                4: { cellWidth: 40 },
+                5: { cellWidth: 20 },
+                6: { cellWidth: 25 },
+                7: { cellWidth: 32 },
+                8: { cellWidth: 32 }
             },
-            margin: { horizontal: 15 }
+            margin: { horizontal: 15 },
+            didDrawPage: function (data) {
+                // page numbering if needed
+            }
         });
 
-        doc.save(`Planejamento_SEMED_${prof.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`Plano_de_Aula_${prof.replace(/\s+/g, '_')}.pdf`);
     } catch (e) {
         console.error(e);
-        alert('Erro ao gerar PDF oficial. Verifique se você está conectado à internet para carregar as bibliotecas.');
+        alert('Erro ao gerar PDF. Verifique os dados.');
     } finally {
         gerarPdfBtn.disabled = false;
         gerarPdfBtn.innerHTML = '<span class="btn-icon">📄</span> GERAR PDF OFICIAL';
     }
 };
 
-// 6. Word Generation (Simplified Table-based)
+// 6. Word Generation
 const gerarWordBtn = document.getElementById('gerar-word-btn');
 gerarWordBtn.onclick = () => {
     const prof = document.getElementById('professor').value || '/';
-    const turmas = document.getElementById('turmas').value || '/';
+    const escola = document.getElementById('escola').value || '/';
     const data = [];
     weeksContainer.querySelectorAll('.week-block').forEach(block => {
         data.push([
-            block.querySelector('.field-semana-label').value + ' ' + block.querySelector('.field-date-start').value + ' a ' + block.querySelector('.field-date-end').value,
-            block.querySelector('.field-habilidades').value,
-            block.querySelector('.field-objetivos').value,
+            block.querySelector('.field-semana-label').value,
+            block.querySelector('.field-eixo').value,
             block.querySelector('.field-objetos').value,
+            block.querySelector('.field-objetivos').value,
             block.querySelector('.field-metodologia').value,
-            block.querySelector('.field-avaliacao').value
+            block.querySelector('.field-recursos').value,
+            block.querySelector('.field-adaptacoes').value,
+            block.querySelector('.field-avaliacao').value,
+            block.querySelector('.field-recuperacao').value
         ]);
     });
 
@@ -372,15 +434,28 @@ gerarWordBtn.onclick = () => {
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head><meta charset='utf-8'><style>
             table { border-collapse: collapse; width: 100%; border: 1px solid black; } 
-            th, td { border: 1px solid black; padding: 5px; font-family: Arial; font-size: 10pt; vertical-align: middle; }
-            th { background-color: #f0f0f0; }
+            th, td { border: 1px solid black; padding: 5px; font-family: Arial; font-size: 9pt; vertical-align: middle; }
+            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
         </style></head>
         <body style="mso-page-orientation: landscape;">
-        <h2 style="text-align:center">SECRETARIA MUNICIPAL DE EDUCAÇÃO - SEMED</h2>
-        <h4 style="text-align:center">${document.getElementById('planejamento-titulo').value}</h4>
-        <p><b>FORMADOR:</b> ${document.getElementById('coordenador').value} | <b>PROFESSOR:</b> ${prof} | <b>TURMAS:</b> ${turmas}</p>
+        <h2 style="text-align:center">PREFEITURA MUNICIPAL DE ALTOS</h2>
+        <h3 style="text-align:center">SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h3>
+        <p><b>ESCOLA:</b> ${escola} | <b>PROFESSOR:</b> ${prof}</p>
+        <h4 style="text-align:center; border: 1px solid black; padding: 5px;">- PLANO DE AULA - ${document.getElementById('periodo-geral').value}</h4>
         <table>
-            <thead><tr><th>DATAS</th><th>HABILIDADES</th><th>OBJETIVOS</th><th>OBJETO</th><th>METODOLOGIA</th><th>AVALIAÇÃO</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Eixo/Temática</th>
+                    <th>Objeto do Conhecimento</th>
+                    <th>Objetivos</th>
+                    <th>Estratégias Metodológicas</th>
+                    <th>Recursos</th>
+                    <th>Adaptações Curriculares</th>
+                    <th>Avaliação</th>
+                    <th>Recuperação</th>
+                </tr>
+            </thead>
             <tbody>${data.map(r => `<tr>${r.map(c => `<td>${c.replace(/\n/g, '<br>')}</td>`).join('')}</tr>`).join('')}</tbody>
         </table>
         </body></html>
@@ -389,7 +464,7 @@ gerarWordBtn.onclick = () => {
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `Planejamento_${prof}.doc`;
+    link.download = `Plano_de_Aula_${prof}.doc`;
     link.click();
 };
 
@@ -408,4 +483,7 @@ gerarWordBtn.onclick = () => {
             document.getElementById('logo-escola').src = logoEscolaB64;
         }
     }
+    // Load Saved Theme
+    const savedTheme = localStorage.getItem('semed_app_theme') || 'light';
+    setTheme(savedTheme);
 })();

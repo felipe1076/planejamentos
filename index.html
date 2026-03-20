@@ -25,9 +25,9 @@
                     <label for="upload-logo-semed" class="change-logo-btn">Trocar Logo</label>
                 </div>
                 <div class="header-titles official-titles">
-                    <h2>SECRETARIA MUNICIPAL DE EDUCAÇÃO - SEMED</h2>
-                    <h3>COORDENAÇÃO DE ENSINO 6º AO 9º ANO</h3>
-                    <h4>COMPONENTE CURRICULAR: <input type="text" id="componente" value="PROJETOS INTEGRADORES" placeholder="Componente Curricular"></h4>
+                    <h1>PREFEITURA MUNICIPAL DE ALTOS</h1>
+                    <h2>SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h2>
+                    <h3>COMPONENTE CURRICULAR: <input type="text" id="componente" value="PROJETOS INTEGRADORES" placeholder="Componente Curricular"></h3>
                 </div>
                 <div class="logo-wrapper">
                     <img src="zeca_marinha_logo.svg" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
@@ -37,27 +37,35 @@
             </div>
             
             <div class="banners-section">
-                <div class="green-banner">
-                    <input type="text" id="planejamento-titulo" value="I PLANEJAMENTO MENSAL PROJETOS INTEGRADORES DO 6º AO 9º ANO">
-                    <input type="text" id="periodo" value="PERÍODO: 09/02 A 23/03 DE 2026">
-                </div>
-                <div class="green-banner eixo-banner">
-                    <label>EIXO INTEGRADOR - </label>
-                    <input type="text" id="eixo" value="Perfil do Estudante: Identidade, Pertencimento, Convivência e Organização da Vida Escolar">
-                </div>
-                <div class="blue-banner formador-row">
+                <div class="id-row">
                     <div class="form-item">
-                        <label>FORMADOR:</label>
-                        <input type="text" id="coordenador" value="Elizete Nunes da Silva">
+                        <label>DURAÇÃO:</label>
+                        <input type="text" id="duracao" value="60MIN.">
                     </div>
                     <div class="form-item">
-                        <label>PROFESSOR:</label>
+                        <label>TURMA:</label>
+                        <input type="text" id="turma" placeholder="Ex: 9°A">
+                    </div>
+                    <div class="form-item">
+                        <label>TURNO:</label>
+                        <input type="text" id="turno" value="INTEGRAL">
+                    </div>
+                </div>
+                <div class="id-row">
+                    <div class="form-item full">
+                        <label>ESCOLA:</label>
+                        <input type="text" id="escola" placeholder="Nome da Escola">
+                    </div>
+                </div>
+                <div class="id-row">
+                    <div class="form-item full">
+                        <label>PROFESSOR (A):</label>
                         <input type="text" id="professor" placeholder="Nome do Professor">
                     </div>
-                    <div class="form-item">
-                        <label>TURMA(S):</label>
-                        <input type="text" id="turmas" placeholder="Ex: 6º AO 9º ANO">
-                    </div>
+                </div>
+                <div class="blue-banner plan-title-row">
+                    <span class="plan-label">- PLANO DE AULA -</span>
+                    <input type="text" id="periodo-geral" value="SEMANA de 09 a 13/02 de 2026">
                 </div>
             </div>
         </header>
@@ -78,7 +86,7 @@
                 </div>
             </section>
 
-            <!-- 4. AÇÃO DO BOTÃO -->
+            <!-- 4. AÇÃO DO BOTÃO PRINCIPAL -->
             <div class="action-container grid-buttons">
                 <button id="gerar-pdf-btn" class="btn-main">
                     <span class="btn-icon">📄</span> GERAR PDF OFICIAL
@@ -87,19 +95,29 @@
                     <span class="btn-icon">📝</span> GERAR WORD (DOC)
                 </button>
             </div>
-
-            <div class="data-actions">
-                <button id="exportar-btn" class="btn-data">
-                    <span class="btn-icon">📤</span> Exportar Backup
-                </button>
-                <button id="importar-btn" class="btn-data">
-                    <span class="btn-icon">📥</span> Importar Backup
-                </button>
-                <input type="file" id="importar-input" accept=".json" style="display: none;">
-            </div>
         </main>
 
         <footer class="app-footer">
+            <div class="footer-actions">
+                <button id="exportar-btn" class="btn-footer" title="Exportar Backup">
+                    <span class="icon">📤</span>
+                </button>
+                <button id="importar-btn" class="btn-footer" title="Importar Backup">
+                    <span class="icon">📥</span>
+                </button>
+                <div class="theme-menu-container">
+                    <button id="theme-btn" class="btn-footer" title="Mudar Tema">
+                        <span class="icon">🎨</span>
+                    </button>
+                    <div id="theme-dropdown" class="theme-dropdown">
+                        <button data-theme="light">Claro</button>
+                        <button data-theme="dark">Escuro</button>
+                        <button data-theme="blue">Azul</button>
+                        <button data-theme="lilac">Lilás</button>
+                    </div>
+                </div>
+                <input type="file" id="importar-input" accept=".json" style="display: none;">
+            </div>
             <p>&copy; 2026 SEMED Altos. Todos os direitos reservados.</p>
         </footer>
     </div>
@@ -112,38 +130,42 @@
             </div>
             <div class="week-grid">
                 <div class="form-group row">
-                    <div class="col section-label">
-                        <label>DESCRIÇÃO</label>
-                        <input type="text" class="field-semana-label" placeholder="Ex: 1ª SEMANA">
-                    </div>
                     <div class="col">
-                        <label>INÍCIO</label>
-                        <input type="text" class="field-date-start" placeholder="Data">
-                    </div>
-                    <div class="col">
-                        <label>FIM</label>
-                        <input type="text" class="field-date-end" placeholder="Data">
+                        <label>DATA/PERÍODO</label>
+                        <input type="text" class="field-semana-label" placeholder="Ex: 10 a 12 de fevereiro">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>HABILIDADES (BNCC)</label>
-                    <textarea class="field-habilidades" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>OBJETIVOS</label>
-                    <textarea class="field-objetivos" rows="3"></textarea>
+                    <label>EIXO / TEMÁTICA</label>
+                    <textarea class="field-eixo" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label>OBJETO DO CONHECIMENTO</label>
                     <textarea class="field-objetos" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>METODOLOGIA</label>
+                    <label>OBJETIVOS</label>
+                    <textarea class="field-objetivos" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>ESTRATÉGIAS METODOLÓGICAS</label>
                     <textarea class="field-metodologia" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>RECURSOS</label>
+                    <textarea class="field-recursos" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>ADAPTAÇÕES CURRICULARES</label>
+                    <textarea class="field-adaptacoes" rows="2"></textarea>
                 </div>
                 <div class="form-group">
                     <label>AVALIAÇÃO</label>
                     <textarea class="field-avaliacao" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>RECUPERAÇÃO</label>
+                    <textarea class="field-recuperacao" rows="2"></textarea>
                 </div>
             </div>
         </div>
