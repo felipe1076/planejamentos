@@ -6,9 +6,6 @@ const weekTemplate = document.getElementById('week-template');
 function createWeek(data = null) {
     const clone = weekTemplate.content.cloneNode(true);
     const block = clone.querySelector('.week-block');
-    const index = weeksContainer.querySelectorAll('.week-block').length + 1;
-    block.querySelector('.week-num').textContent = index;
-    
     // Select fields
     const labelField = block.querySelector('.field-semana-label');
     const eixo = block.querySelector('.field-eixo');
@@ -70,13 +67,20 @@ function createWeek(data = null) {
         saveData();
     };
     
-    weeksContainer.appendChild(clone);
+    weeksContainer.prepend(clone);
+    updateWeekNumbers();
 }
 
 function updateWeekNumbers() {
-    const blocks = weeksContainer.querySelectorAll('.week-block');
+    const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
     blocks.forEach((block, idx) => {
-        block.querySelector('.week-num').textContent = idx + 1;
+        const num = idx + 1;
+        block.querySelector('.week-num').textContent = num;
+        
+        // Apply different colors cycling through 1-5
+        block.classList.remove('color-1', 'color-2', 'color-3', 'color-4', 'color-5');
+        const colorIdx = ((num - 1) % 5) + 1;
+        block.classList.add(`color-${colorIdx}`);
     });
 }
 
@@ -154,7 +158,8 @@ function loadData() {
         // Populate Weeks
         weeksContainer.innerHTML = "";
         if (data.weeks && data.weeks.length > 0) {
-            data.weeks.forEach(w => createWeek(w));
+            // Reverse when loading because createWeek uses prepend()
+            [...data.weeks].reverse().forEach(w => createWeek(w));
         } else {
             createWeek();
         }
@@ -304,51 +309,55 @@ gerarPdfBtn.onclick = async () => {
         const componente = document.getElementById('componente').value || '';
         const periodoTxt = document.getElementById('periodo-geral').value || '';
 
-        // 1. TOP SECTION: Logos and Text (Preserving Aspect Ratio)
+        // 4. LOOP THROUGH WEEKS (ONE PER PAGE)
+        const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
         const semedImgEl = document.getElementById('logo-semed');
         const escolaImgEl = document.getElementById('logo-escola');
-
-        if (logoSemedB64 && semedImgEl.naturalWidth) {
-            const ratio = semedImgEl.naturalHeight / semedImgEl.naturalWidth;
-            const h = 55 * ratio; // Fixed width 55mm
-            doc.addImage(logoSemedB64, 'PNG', 10, 8, 55, h);
-        }
-        if (logoEscolaB64 && escolaImgEl.naturalWidth) {
-            const ratio = escolaImgEl.naturalHeight / escolaImgEl.naturalWidth;
-            const h = 55 * ratio; // Fixed width 55mm
-            doc.addImage(logoEscolaB64, 'PNG', 232, 8, 55, h);
-        }
         
-        doc.setFont('Helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.text('PREFEITURA MUNICIPAL DE ALTOS', 148, 12, { align: 'center' });
-        doc.setFontSize(10);
-        doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED', 148, 17, { align: 'center' });
-        doc.text('COMPONENTE CURRICULAR: ' + componente.toUpperCase(), 148, 22, { align: 'center' });
+        for (let i = 0; i < blocks.length; i++) {
+            if (i > 0) doc.addPage();
+            const block = blocks[i];
+            const weekLabel = block.querySelector('.field-semana-label').value || '';
 
-        // Metadata Rows
-        doc.setFontSize(9);
-        doc.text(`DURAÇÃO: ${duracao.toUpperCase()}`, 100, 30);
-        doc.text(`TURMA: ${turma.toUpperCase()}`, 145, 30);
-        doc.text(`TURNO: ${turno.toUpperCase()}`, 180, 30);
-        
-        doc.text(`ESCOLA: ${escola.toUpperCase()}`, 15, 36);
-        doc.text(`PROFESSOR (A): ${prof.toUpperCase()}`, 15, 42);
+            // --- DRAW HEADER ON EVERY PAGE ---
+            if (logoSemedB64 && semedImgEl.naturalWidth) {
+                const ratio = semedImgEl.naturalHeight / semedImgEl.naturalWidth;
+                const h = 55 * ratio;
+                doc.addImage(logoSemedB64, 'PNG', 10, 8, 55, h);
+            }
+            if (logoEscolaB64 && escolaImgEl.naturalWidth) {
+                const ratio = escolaImgEl.naturalHeight / escolaImgEl.naturalWidth;
+                const h = 55 * ratio;
+                doc.addImage(logoEscolaB64, 'PNG', 232, 8, 55, h);
+            }
+            
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(0);
+            doc.text('PREFEITURA MUNICIPAL DE ALTOS', 148, 12, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED', 148, 17, { align: 'center' });
+            doc.text('COMPONENTE CURRICULAR: ' + componente.toUpperCase(), 148, 22, { align: 'center' });
 
-        // PLANO DE AULA BANNER
-        doc.setFillColor(243, 232, 255); // Light Lilac
-        doc.setDrawColor(216, 180, 254); // Purple Border
-        doc.rect(15, 48, 267, 10, 'FD');
-        doc.setTextColor(88, 28, 135); // Dark Purple Text
-        doc.setFontSize(10);
-        doc.text(`- PLANO DE AULA -      ${periodoTxt.toUpperCase()}`, 148, 54.5, { align: 'center' });
-        doc.setTextColor(0); // Reset text color
+            doc.setFontSize(9);
+            doc.text(`DURAÇÃO: ${duracao.toUpperCase()}`, 100, 30);
+            doc.text(`TURMA: ${turma.toUpperCase()}`, 145, 30);
+            doc.text(`TURNO: ${turno.toUpperCase()}`, 180, 30);
+            doc.text(`ESCOLA: ${escola.toUpperCase()}`, 15, 36);
+            doc.text(`PROFESSOR (A): ${prof.toUpperCase()}`, 15, 42);
 
-        // 4. MAIN TABLE
-        const tableRows = [];
-        weeksContainer.querySelectorAll('.week-block').forEach(block => {
-            tableRows.push([
-                block.querySelector('.field-semana-label').value,
+            // PLANO DE AULA BANNER (Use Week Specific Label)
+            doc.setFillColor(243, 232, 255); 
+            doc.setDrawColor(216, 180, 254);
+            doc.rect(15, 48, 267, 10, 'FD');
+            doc.setTextColor(88, 28, 135);
+            doc.setFontSize(10);
+            doc.text(`- PLANO DE AULA -      ${weekLabel.toUpperCase()}`, 148, 54.5, { align: 'center' });
+            doc.setTextColor(0);
+
+            // TABLE FOR THIS WEEK
+            const row = [
+                weekLabel,
                 block.querySelector('.field-eixo').value,
                 block.querySelector('.field-objetos').value,
                 block.querySelector('.field-objetivos').value,
@@ -357,48 +366,45 @@ gerarPdfBtn.onclick = async () => {
                 block.querySelector('.field-adaptacoes').value,
                 block.querySelector('.field-avaliacao').value,
                 block.querySelector('.field-recuperacao').value
-            ]);
-        });
+            ];
 
-        doc.autoTable({
-            startY: 58,
-            head: [['Data', 'Eixo/\nTemática', 'Objeto do\nConhecimento', 'Objetivos', 'Estratégias\nMetodológicas', 'Recursos', 'Adaptações\nCurriculares', 'Avaliação', 'Recuperação']],
-            body: tableRows,
-            theme: 'grid',
-            headStyles: { 
-                fillColor: [240, 240, 240], 
-                textColor: 0, 
-                fontStyle: 'bold', 
-                halign: 'center',
-                valign: 'middle',
-                lineWidth: 0.1,
-                lineColor: 0,
-                fontSize: 8
-            },
-            styles: { 
-                fontSize: 7.5, 
-                cellPadding: 2, 
-                overflow: 'linebreak',
-                valign: 'middle',
-                lineWidth: 0.1,
-                lineColor: 0
-            },
-            columnStyles: { 
-                0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
-                1: { cellWidth: 32 },
-                2: { cellWidth: 32 },
-                3: { cellWidth: 32 },
-                4: { cellWidth: 40 },
-                5: { cellWidth: 20 },
-                6: { cellWidth: 25 },
-                7: { cellWidth: 32 },
-                8: { cellWidth: 32 }
-            },
-            margin: { horizontal: 15 },
-            didDrawPage: function (data) {
-                // page numbering if needed
-            }
-        });
+            doc.autoTable({
+                startY: 58,
+                head: [['Data', 'Eixo/\nTemática', 'Objeto do\nConhecimento', 'Objetivos', 'Estratégias\nMetodológicas', 'Recursos', 'Adaptações\nCurriculares', 'Avaliação', 'Recuperação']],
+                body: [row],
+                theme: 'grid',
+                headStyles: { 
+                    fillColor: [240, 240, 240], 
+                    textColor: 0, 
+                    fontStyle: 'bold', 
+                    halign: 'center',
+                    valign: 'middle',
+                    lineWidth: 0.1,
+                    lineColor: 0,
+                    fontSize: 8
+                },
+                styles: { 
+                    fontSize: 7.5, 
+                    cellPadding: 2, 
+                    overflow: 'linebreak',
+                    valign: 'middle',
+                    lineWidth: 0.1,
+                    lineColor: 0
+                },
+                columnStyles: { 
+                    0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
+                    1: { cellWidth: 32 },
+                    2: { cellWidth: 32 },
+                    3: { cellWidth: 32 },
+                    4: { cellWidth: 40 },
+                    5: { cellWidth: 20 },
+                    6: { cellWidth: 25 },
+                    7: { cellWidth: 32 },
+                    8: { cellWidth: 32 }
+                },
+                margin: { horizontal: 15 }
+            });
+        }
 
         doc.save(`Plano_de_Aula_${prof.replace(/\s+/g, '_')}.pdf`);
     } catch (e) {
@@ -415,10 +421,24 @@ const gerarWordBtn = document.getElementById('gerar-word-btn');
 gerarWordBtn.onclick = () => {
     const prof = document.getElementById('professor').value || '/';
     const escola = document.getElementById('escola').value || '/';
-    const data = [];
-    weeksContainer.querySelectorAll('.week-block').forEach(block => {
-        data.push([
-            block.querySelector('.field-semana-label').value,
+    const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
+
+    let html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><style>
+            table { border-collapse: collapse; width: 100%; border: 1px solid black; } 
+            th, td { border: 1px solid black; padding: 5px; font-family: Arial; font-size: 9pt; vertical-align: middle; }
+            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+            .page-break { page-break-before: always; }
+            .banner { text-align:center; border: 1px solid black; padding: 5px; background-color: #f3e8ff; font-weight: bold; margin: 10px 0; }
+        </style></head>
+        <body style="mso-page-orientation: landscape;">
+    `;
+
+    blocks.forEach((block, idx) => {
+        const weekLabel = block.querySelector('.field-semana-label').value || '';
+        const row = [
+            weekLabel,
             block.querySelector('.field-eixo').value,
             block.querySelector('.field-objetos').value,
             block.querySelector('.field-objetivos').value,
@@ -427,46 +447,50 @@ gerarWordBtn.onclick = () => {
             block.querySelector('.field-adaptacoes').value,
             block.querySelector('.field-avaliacao').value,
             block.querySelector('.field-recuperacao').value
-        ]);
+        ];
+
+        if (idx > 0) html += `<div class="page-break"></div>`;
+
+        html += `
+            <h2 style="text-align:center">PREFEITURA MUNICIPAL DE ALTOS</h2>
+            <h3 style="text-align:center">SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h3>
+            <p><b>ESCOLA:</b> ${escola} | <b>PROFESSOR:</b> ${prof}</p>
+            <div class="banner">- PLANO DE AULA - ${weekLabel.toUpperCase()}</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Eixo/Temática</th>
+                        <th>Objeto do Conhecimento</th>
+                        <th>Objetivos</th>
+                        <th>Estratégias Metodológicas</th>
+                        <th>Recursos</th>
+                        <th>Adaptações Curriculares</th>
+                        <th>Avaliação</th>
+                        <th>Recuperação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        ${row.map(c => `<td>${c.replace(/\n/g, '<br>')}</td>`).join('')}
+                    </tr>
+                </tbody>
+            </table>
+        `;
     });
 
-    let html = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head><meta charset='utf-8'><style>
-            table { border-collapse: collapse; width: 100%; border: 1px solid black; } 
-            th, td { border: 1px solid black; padding: 5px; font-family: Arial; font-size: 9pt; vertical-align: middle; }
-            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
-        </style></head>
-        <body style="mso-page-orientation: landscape;">
-        <h2 style="text-align:center">PREFEITURA MUNICIPAL DE ALTOS</h2>
-        <h3 style="text-align:center">SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h3>
-        <p><b>ESCOLA:</b> ${escola} | <b>PROFESSOR:</b> ${prof}</p>
-        <h4 style="text-align:center; border: 1px solid black; padding: 5px;">- PLANO DE AULA - ${document.getElementById('periodo-geral').value}</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Eixo/Temática</th>
-                    <th>Objeto do Conhecimento</th>
-                    <th>Objetivos</th>
-                    <th>Estratégias Metodológicas</th>
-                    <th>Recursos</th>
-                    <th>Adaptações Curriculares</th>
-                    <th>Avaliação</th>
-                    <th>Recuperação</th>
-                </tr>
-            </thead>
-            <tbody>${data.map(r => `<tr>${r.map(c => `<td>${c.replace(/\n/g, '<br>')}</td>`).join('')}</tr>`).join('')}</tbody>
-        </table>
-        </body></html>
-    `;
+    html += `</body></html>`;
 
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `Plano_de_Aula_${prof}.doc`;
+    link.download = `Plano_de_Aula_${prof.replace(/\s+/g, '_')}.doc`;
     link.click();
 };
+
+// 7. Floating Buttons
+document.getElementById('float-pdf-btn').onclick = () => document.getElementById('gerar-pdf-btn').click();
+document.getElementById('float-word-btn').onclick = () => document.getElementById('gerar-word-btn').click();
 
 // Start
 (async () => {
