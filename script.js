@@ -308,6 +308,8 @@ gerarPdfBtn.onclick = async () => {
         const escola = document.getElementById('escola').value || '';
         const componente = document.getElementById('componente').value || '';
         const periodoTxt = document.getElementById('periodo-geral').value || '';
+        
+        const sanitizeFilename = (str) => str.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
 
         // 4. LOOP THROUGH WEEKS (ONE PER PAGE)
         const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
@@ -406,7 +408,8 @@ gerarPdfBtn.onclick = async () => {
             });
         }
 
-        doc.save(`Plano_de_Aula_${prof.replace(/\s+/g, '_')}.pdf`);
+        const fileName = `PLANO_DE_AULA_TURMA_${sanitizeFilename(turma)}_${sanitizeFilename(prof)}.pdf`;
+        doc.save(fileName);
     } catch (e) {
         console.error(e);
         alert('Erro ao gerar PDF. Verifique os dados.');
@@ -421,6 +424,7 @@ const gerarWordBtn = document.getElementById('gerar-word-btn');
 gerarWordBtn.onclick = () => {
     const prof = document.getElementById('professor').value || '/';
     const escola = document.getElementById('escola').value || '/';
+    const sanitizeFilename = (str) => str.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
     const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
 
     let html = `
@@ -484,7 +488,9 @@ gerarWordBtn.onclick = () => {
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `Plano_de_Aula_${prof.replace(/\s+/g, '_')}.doc`;
+    const turma = document.getElementById('turma').value || '';
+    const fileName = `PLANO_DE_AULA_TURMA_${sanitizeFilename(turma)}_${sanitizeFilename(prof)}.doc`;
+    link.download = fileName;
     link.click();
 };
 
