@@ -516,4 +516,47 @@ document.getElementById('float-word-btn').onclick = () => document.getElementByI
     // Load Saved Theme
     const savedTheme = localStorage.getItem('semed_app_theme') || 'light';
     setTheme(savedTheme);
+    
+    // 8. View Mode Toggle
+    const viewMobileBtn = document.getElementById('view-mobile-btn');
+    const viewPcBtn = document.getElementById('view-pc-btn');
+
+    if (viewMobileBtn && viewPcBtn) {
+        viewMobileBtn.onclick = () => {
+            if (document.body.classList.contains('view-mobile')) {
+                setViewMode('auto');
+            } else {
+                setViewMode('mobile');
+            }
+        };
+        viewPcBtn.onclick = () => {
+            if (document.body.classList.contains('view-pc')) {
+                setViewMode('auto');
+            } else {
+                setViewMode('pc');
+            }
+        };
+
+        function setViewMode(mode) {
+            document.body.classList.remove('view-mobile', 'view-pc');
+            viewMobileBtn.classList.remove('active');
+            viewPcBtn.classList.remove('active');
+            
+            if (mode === 'mobile') {
+                document.body.classList.add('view-mobile');
+                viewMobileBtn.classList.add('active');
+            } else if (mode === 'pc') {
+                document.body.classList.add('view-pc');
+                viewPcBtn.classList.add('active');
+            }
+            
+            localStorage.setItem('semed_app_view_mode', mode);
+        }
+
+        // Load Saved View Mode
+        const savedViewMode = localStorage.getItem('semed_app_view_mode') || 'auto';
+        if (savedViewMode !== 'auto') {
+            setViewMode(savedViewMode);
+        }
+    }
 })();
