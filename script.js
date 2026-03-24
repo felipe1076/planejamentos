@@ -497,27 +497,79 @@ gerarWordBtn.onclick = () => {
 // 7. Floating Buttons
 document.getElementById('float-pdf-btn').onclick = () => document.getElementById('gerar-pdf-btn').click();
 document.getElementById('float-word-btn').onclick = () => document.getElementById('gerar-word-btn').click();
+document.getElementById('float-resumo-btn').onclick = () => document.getElementById('gerar-resumo-btn').click();
+
+// 8. Summary Generator Logic
+const summaryModal = document.getElementById('summary-modal');
+const summaryBody = document.getElementById('summary-body');
+const closeModalBtn = document.querySelector('.close-modal');
+const gerarResumoBtn = document.getElementById('gerar-resumo-btn');
+const copySummaryBtn = document.getElementById('copy-summary-btn');
+
+gerarResumoBtn.onclick = () => {
+    const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
+    if (blocks.length === 0) return alert("Adicione pelo menos uma semana para gerar o resumo.");
+
+    let summaryText = "";
+    blocks.forEach((block) => {
+        const period = block.querySelector('.field-semana-label').value.trim() || "Período não definido";
+        const objetos = block.querySelector('.field-objetos').value.trim();
+        const metodologia = block.querySelector('.field-metodologia').value.trim();
+
+        if (objetos || metodologia) {
+            summaryText += `---------------------------\nPERÍODO: ${period.toUpperCase()}\n---------------------------\n`;
+            if (objetos) summaryText += objetos + "\n\n";
+            if (metodologia) summaryText += metodologia + "\n\n";
+        }
+    });
+
+    if (!summaryText.trim()) summaryText = "Nenhum conteúdo encontrado nos campos de Objetos de Conhecimento ou Metodologia.";
+    
+    summaryBody.innerHTML = `<div class="summary-box">${summaryText.trim()}</div>`;
+    summaryModal.style.display = 'block';
+};
+
+closeModalBtn.onclick = () => summaryModal.style.display = 'none';
+window.onclick = (event) => {
+    if (event.target == summaryModal) summaryModal.style.display = 'none';
+    if (!event.target.matches('#theme-btn') && !event.target.closest('.theme-dropdown')) {
+        themeDropdown.classList.remove('show');
+    }
+};
+
+copySummaryBtn.onclick = () => {
+    const text = summaryBody.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = copySummaryBtn.innerText;
+        copySummaryBtn.innerText = "Copiado!";
+        setTimeout(() => copySummaryBtn.innerText = originalText, 2000);
+    }).catch(err => {
+        alert("Erro ao copiar: " + err);
+    });
+};
 
 // Start
 (async () => {
     loadData();
-    if (!logoSemedB64) {
+    
+    // Check if logos are still the default filenames or empty before applying SVG defaults
+    const semedImg = document.getElementById('logo-semed');
+    const escolaImg = document.getElementById('logo-escola');
+
+    if (!logoSemedB64 && (semedImg.src.includes('semed_altos_logo.svg') || !semedImg.src)) {
         logoSemedB64 = await svgToBase64(SEMED_LOGO_DEFAULT);
-        if (!document.getElementById('logo-semed').src || document.getElementById('logo-semed').src.includes('semed_altos_logo.svg')) {
-            document.getElementById('logo-semed').src = logoSemedB64;
-        }
+        semedImg.src = logoSemedB64;
     }
-    if (!logoEscolaB64) {
+    if (!logoEscolaB64 && (escolaImg.src.includes('zeca_marinha_logo.svg') || !escolaImg.src)) {
         logoEscolaB64 = await svgToBase64(ESCOLA_LOGO_DEFAULT);
-        if (!document.getElementById('logo-escola').src || document.getElementById('logo-escola').src.includes('zeca_marinha_logo.svg')) {
-            document.getElementById('logo-escola').src = logoEscolaB64;
-        }
+        escolaImg.src = logoEscolaB64;
     }
+
     // Load Saved Theme
     const savedTheme = localStorage.getItem('semed_app_theme') || 'light';
     setTheme(savedTheme);
     
-    // 8. View Mode Toggle
+    // 9. View Mode Toggle
     const viewMobileBtn = document.getElementById('view-mobile-btn');
     const viewPcBtn = document.getElementById('view-pc-btn');
 

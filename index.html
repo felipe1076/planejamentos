@@ -20,7 +20,7 @@
         <header class="main-header official">
             <div class="header-logo-container">
                 <div class="logo-wrapper">
-                    <img src="semed_altos_logo.svg" alt="SEMED Altos Logo" class="header-logo" id="logo-semed">
+                    <img src="logo_prefeitura.png" alt="Prefeitura de Altos" class="header-logo" id="logo-semed">
                     <input type="file" id="upload-logo-semed" accept="image/*" style="display: none;">
                     <label for="upload-logo-semed" class="change-logo-btn">Trocar Logo</label>
                 </div>
@@ -30,7 +30,7 @@
                     <h3>COMPONENTE CURRICULAR: <input type="text" id="componente" value="PROJETOS INTEGRADORES" placeholder="Componente Curricular" spellcheck="true"></h3>
                 </div>
                 <div class="logo-wrapper">
-                    <img src="zeca_marinha_logo.svg" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
+                    <img src="logo_zeca.png" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
                     <input type="file" id="upload-logo-escola" accept="image/*" style="display: none;">
                     <label for="upload-logo-escola" class="change-logo-btn">Trocar Logo</label>
                 </div>
@@ -94,6 +94,9 @@
                 <button id="gerar-word-btn" class="btn-main word">
                     <span class="btn-icon">📝</span> GERAR WORD (DOC)
                 </button>
+                <button id="gerar-resumo-btn" class="btn-main summary">
+                    <span class="btn-icon">📋</span> GERAR RESUMO
+                </button>
             </div>
         </main>
 
@@ -112,8 +115,6 @@
                     <div id="theme-dropdown" class="theme-dropdown">
                         <button data-theme="light">Claro</button>
                         <button data-theme="dark">Escuro</button>
-                        <button data-theme="blue">Azul</button>
-                        <button data-theme="lilac">Lilás</button>
                     </div>
                 </div>
                 <button id="view-mobile-btn" class="btn-footer" title="Ver Modo Celular">
@@ -124,7 +125,7 @@
                 </button>
                 <input type="file" id="importar-input" accept=".json" style="display: none;">
             </div>
-            <p>Sistema de Uso Aberto</p>
+            <p>Sistema de Uso Aberto | Versão 2.1 | Última Atualização: 23/03/2026 | Desenvolvido a pedido de Felipe</p>
         </footer>
     </div>
 
@@ -184,6 +185,25 @@
         <button id="float-word-btn" class="float-btn word" title="Gerar Word (DOC)">
             <span class="icon">📝</span>
         </button>
+        <button id="float-resumo-btn" class="float-btn summary" title="Gerar Resumo">
+            <span class="icon">📋</span>
+        </button>
+    </div>
+
+    <!-- Summary Modal -->
+    <div id="summary-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Resumo do Planejamento</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="summary-body" class="modal-body">
+                <!-- Content generated via JS -->
+            </div>
+            <div class="modal-footer">
+                <button id="copy-summary-btn" class="btn btn-secondary">Copiar Resumo</button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
