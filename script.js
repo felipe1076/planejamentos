@@ -357,26 +357,21 @@ gerarPdfBtn.onclick = async () => {
             doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO-SEMED', 105, 19, { align: 'center' });
             doc.text('COORDENAÇÃO DE ENSINO E APRENDIZAGEM', 105, 23, { align: 'center' });
 
-            // Title Box
-            doc.setDrawColor(0);
-            doc.setLineWidth(0.5);
-            doc.line(15, 30, 195, 30);
-            doc.line(15, 38, 195, 38);
+            // Title Box (Reduced - no bars as requested)
             doc.setFontSize(10);
             doc.setTextColor(0);
             doc.text('PLANEJAMENTO SEMANAL - 6º ao 9º ano do Ensino Fundamental', 105, 35, { align: 'center' });
 
-            // Info rows
+            // Info Box (Consolidated)
             doc.setLineWidth(0.2);
+            doc.setDrawColor(0);
+            doc.rect(15, 40, 180, 15, 'S'); // Single box for all info
+            
             doc.setFontSize(8.5);
-            doc.text(`COMPONENTE CURRICULAR: ${componente.toUpperCase()}`, 15, 45);
-            doc.line(57, 46, 195, 46);
-            
-            doc.text(`ANO: ${ano.toUpperCase()}`, 15, 52);
-            doc.line(26, 53, 60, 53);
-            
-            doc.text(`PROFESSOR(A): ${prof.toUpperCase()}`, 65, 52);
-            doc.line(90, 53, 195, 53);
+            doc.setTextColor(0);
+            doc.text(`COMPONENTE CURRICULAR: ${componente.toUpperCase()}`, 18, 46);
+            doc.text(`ANO: ${ano.toUpperCase()}`, 18, 51);
+            doc.text(`PROFESSOR(A): ${prof.toUpperCase()}`, 65, 51);
 
             let currentY = 58;
             const marginX = 15;
@@ -406,11 +401,11 @@ gerarPdfBtn.onclick = async () => {
                     currentY = 15;
                 }
 
-                // Draw Section Header (Blue)
+                // Draw Section Header (Blue box, Black text/border)
                 doc.setFillColor(185, 233, 255);
-                doc.setDrawColor(0, 86, 179);
+                doc.setDrawColor(0); // Black border
                 doc.rect(marginX, currentY, contentWidth, 7, 'FD');
-                doc.setTextColor(0, 86, 179);
+                doc.setTextColor(0); // Black text
                 doc.setFont('Helvetica', 'bold');
                 doc.setFontSize(8);
                 doc.text(section.label, 105, currentY + 4.5, { align: 'center' });
@@ -448,7 +443,7 @@ gerarPdfBtn.onclick = async () => {
         alert('Erro ao gerar PDF. Verifique os dados.');
     } finally {
         gerarPdfBtn.disabled = false;
-        gerarPdfBtn.innerHTML = '<span class="btn-icon">📄</span> GERAR PDF OFICIAL';
+        gerarPdfBtn.innerHTML = '<span class="btn-icon">🖨️</span> GERAR PDF OFICIAL';
     }
 };
 
@@ -466,10 +461,10 @@ gerarWordBtn.onclick = () => {
         <head><meta charset='utf-8'><style>
             table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } 
             th, td { border: 1px solid black; padding: 8px; font-family: Arial; font-size: 10pt; }
-            th { background-color: #b9e9ff; color: #0056b3; font-weight: bold; text-align: center; text-transform: uppercase; }
+            th { background-color: #b9e9ff; color: black; font-weight: bold; text-align: center; text-transform: uppercase; }
             .page-break { page-break-before: always; }
-            .header-info { margin-bottom: 20px; }
-            .title { text-align: center; font-weight: bold; font-size: 14pt; margin: 10px 0; border-top: 2px solid black; border-bottom: 2px solid black; padding: 5px 0; }
+            .header-info { margin-bottom: 20px; border: 1px solid black; padding: 10px; }
+            .title { text-align: center; font-weight: bold; font-size: 14pt; margin: 10px 0; padding: 5px 0; }
         </style></head>
         <body>
     `;
