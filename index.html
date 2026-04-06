@@ -19,53 +19,43 @@
         <!-- 1. IDENTIFICAÇÃO E CABEÇALHO (Official Theme) -->
         <header class="main-header official">
             <div class="header-logo-container">
-                <div class="logo-wrapper">
-                    <img src="logo_prefeitura.png" alt="Prefeitura de Altos" class="header-logo" id="logo-semed">
+                <div class="logo-wrapper side">
+                    <img src="logo_prefeitura.png.jpg" alt="Prefeitura de Altos" class="header-logo" id="logo-semed">
                     <input type="file" id="upload-logo-semed" accept="image/*" style="display: none;">
                     <label for="upload-logo-semed" class="change-logo-btn">Trocar Logo</label>
                 </div>
                 <div class="header-titles official-titles">
-                    <h1>PREFEITURA MUNICIPAL DE ALTOS</h1>
-                    <h2>SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h2>
-                    <h3>COMPONENTE CURRICULAR: <input type="text" id="componente" value="PROJETOS INTEGRADORES" placeholder="Componente Curricular" spellcheck="true"></h3>
+                    <h1>PREFEITURA MUNICIPAL DE ALTOS-PI</h1>
+                    <h2>SECRETARIA MUNICIPAL DE EDUCAÇÃO-SEMED</h2>
+                    <h2>COORDENAÇÃO DE ENSINO E APRENDIZAGEM</h2>
                 </div>
-                <div class="logo-wrapper">
-                    <img src="logo_zeca.png" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
+                <div class="logo-wrapper side">
+                    <img src="logo_zeca.png.jpg" alt="Escola Zeca da Marinha Logo" class="header-logo" id="logo-escola">
                     <input type="file" id="upload-logo-escola" accept="image/*" style="display: none;">
                     <label for="upload-logo-escola" class="change-logo-btn">Trocar Logo</label>
                 </div>
             </div>
             
-            <div class="banners-section">
-                <div class="id-row">
-                    <div class="form-item">
-                        <label>DURAÇÃO:</label>
-                        <input type="text" id="duracao" value="60MIN." spellcheck="true">
-                    </div>
-                    <div class="form-item">
-                        <label>TURMA:</label>
-                        <input type="text" id="turma" placeholder="Ex: 9°A" spellcheck="true">
-                    </div>
-                    <div class="form-item">
-                        <label>TURNO:</label>
-                        <input type="text" id="turno" value="INTEGRAL" spellcheck="true">
+            <div class="plan-main-title">
+                PLANEJAMENTO SEMANAL - 6º ao 9º ano do Ensino Fundamental
+            </div>
+
+            <div class="header-info-grid">
+                <div class="info-row">
+                    <div class="form-item half">
+                        <label>COMPONENTE CURRICULAR:</label>
+                        <input type="text" id="componente" value="PROJETOS INTEGRADORES" spellcheck="true">
                     </div>
                 </div>
-                <div class="id-row">
-                    <div class="form-item full">
-                        <label>ESCOLA:</label>
-                        <input type="text" id="escola" placeholder="Nome da Escola" spellcheck="true">
+                <div class="info-row">
+                    <div class="form-item third">
+                        <label>ANO:</label>
+                        <input type="text" id="ano" placeholder="Ex: 2026" spellcheck="true">
                     </div>
-                </div>
-                <div class="id-row">
-                    <div class="form-item full">
-                        <label>PROFESSOR (A):</label>
+                    <div class="form-item two-thirds">
+                        <label>PROFESSOR(A):</label>
                         <input type="text" id="professor" placeholder="Nome do Professor" spellcheck="true">
                     </div>
-                </div>
-                <div class="blue-banner plan-title-row">
-                    <span class="plan-label">- PLANO DE AULA -</span>
-                    <input type="text" id="periodo-geral" value="SEMANA de 09 a 13/02 de 2026" spellcheck="true">
                 </div>
             </div>
         </header>
@@ -135,44 +125,70 @@
                 <h3>Semana <span class="week-num">1</span></h3>
                 <button class="remove-week-btn" title="Remover">×</button>
             </div>
-            <div class="week-grid">
-                <div class="form-group row">
-                    <div class="col">
-                        <label>DATA/PERÍODO</label>
-                        <input type="text" class="field-semana-label" placeholder="Ex: 10 a 12 de fevereiro">
-                    </div>
+            <div class="week-body-sections">
+                <div class="form-section">
+                    <label class="blue-section-header">EIXO INTEGRADOR SOCIOEMOCIONAL</label>
+                    <textarea class="field-eixo-socioemocional" rows="2" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>EIXO / TEMÁTICA</label>
-                    <textarea class="field-eixo" rows="3" spellcheck="true"></textarea>
+
+                <div class="form-section">
+                    <label class="blue-section-header">PERÍODO: <span class="week-num-display">1</span>ª SEMANA</label>
+                    <input type="text" class="field-semana-label" placeholder="Ex: 10 a 12 de fevereiro">
                 </div>
-                <div class="form-group">
-                    <label>OBJETO DO CONHECIMENTO</label>
-                    <textarea class="field-objetos" rows="3" spellcheck="true"></textarea>
+
+                <div class="form-section">
+                    <label class="blue-section-header">DATAS IMPORTANTES DA SEMANA</label>
+                    <textarea class="field-datas" rows="2" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>OBJETIVOS</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">UNIDADES TEMÁTICAS/PRÁTICAS DE LINGUAGEM/EIXO</label>
+                    <textarea class="field-unidades" rows="3" spellcheck="true"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="blue-section-header">HABILIDADES</label>
+                    <textarea class="field-habilidades" rows="3" spellcheck="true"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="blue-section-header">EXPECTATIVAS DE APRENDIZAGEM (OBJETIVOS)</label>
                     <textarea class="field-objetivos" rows="3" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>ESTRATÉGIAS METODOLÓGICAS</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">OBJETOS DO CONHECIMENTO / CONTEÚDO</label>
+                    <textarea class="field-objetos" rows="3" spellcheck="true"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="blue-section-header">ESTRATÉGIAS METODOLÓGICAS</label>
                     <textarea class="field-metodologia" rows="3" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>RECURSOS</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">RECURSOS</label>
                     <textarea class="field-recursos" rows="2" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>ADAPTAÇÕES CURRICULARES</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">ADAPTAÇÕES CURRICULARES</label>
                     <textarea class="field-adaptacoes" rows="2" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>AVALIAÇÃO</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">AVALIAÇÃO DAS APRENDIZAGENS</label>
                     <textarea class="field-avaliacao" rows="3" spellcheck="true"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>RECUPERAÇÃO</label>
+
+                <div class="form-section">
+                    <label class="blue-section-header">RECUPERAÇÃO PARALELA (OBJETIVOS PRIORITÁRIOS)</label>
                     <textarea class="field-recuperacao" rows="2" spellcheck="true"></textarea>
+                </div>
+
+                <div class="form-section">
+                    <label class="blue-section-header">REFERÊNCIAS</label>
+                    <textarea class="field-referencias" rows="2" spellcheck="true"></textarea>
                 </div>
             </div>
         </div>

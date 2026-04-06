@@ -6,32 +6,33 @@ const weekTemplate = document.getElementById('week-template');
 function createWeek(data = null) {
     const clone = weekTemplate.content.cloneNode(true);
     const block = clone.querySelector('.week-block');
+    
     // Select fields
-    const labelField = block.querySelector('.field-semana-label');
-    const eixo = block.querySelector('.field-eixo');
-    const objetos = block.querySelector('.field-objetos');
-    const objetivos = block.querySelector('.field-objetivos');
-    const metodologia = block.querySelector('.field-metodologia');
-    const recursos = block.querySelector('.field-recursos');
-    const adaptacoes = block.querySelector('.field-adaptacoes');
-    const avaliacao = block.querySelector('.field-avaliacao');
-    const recuperacao = block.querySelector('.field-recuperacao');
+    const fields = {
+        eixoSocioemocional: block.querySelector('.field-eixo-socioemocional'),
+        semanaLabel: block.querySelector('.field-semana-label'),
+        datas: block.querySelector('.field-datas'),
+        unidades: block.querySelector('.field-unidades'),
+        habilidades: block.querySelector('.field-habilidades'),
+        objetivos: block.querySelector('.field-objetivos'),
+        objetos: block.querySelector('.field-objetos'),
+        metodologia: block.querySelector('.field-metodologia'),
+        recursos: block.querySelector('.field-recursos'),
+        adaptacoes: block.querySelector('.field-adaptacoes'),
+        avaliacao: block.querySelector('.field-avaliacao'),
+        recuperacao: block.querySelector('.field-recuperacao'),
+        referencias: block.querySelector('.field-referencias')
+    };
 
-    // Fill data if provided, otherwise default
+    // Fill data if provided
     if (data) {
-        labelField.value = data.label || "";
-        eixo.value = data.eixo || "";
-        objetos.value = data.objetos || "";
-        objetivos.value = data.objetivos || "";
-        metodologia.value = data.metodologia || "";
-        recursos.value = data.recursos || "";
-        adaptacoes.value = data.adaptacoes || "";
-        avaliacao.value = data.avaliacao || "";
-        recuperacao.value = data.recuperacao || "";
+        Object.keys(fields).forEach(key => {
+            if (data[key] !== undefined) fields[key].value = data[key];
+        });
     }
 
-    // Initialize Flatpickr for Range
-    flatpickr(labelField, { 
+    // Initialize Flatpickr for Range on the semanaLabel
+    flatpickr(fields.semanaLabel, { 
         mode: "range", 
         dateFormat: "d/m", 
         locale: "pt", 
@@ -42,15 +43,14 @@ function createWeek(data = null) {
                 const startStr = start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
                 const endStr = end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
                 
-                // Format nicely: "10 a 12 de fevereiro"
                 if (start.getMonth() === end.getMonth()) {
                     const month = startStr.split(' de ')[1];
-                    labelField.value = `${start.getDate()} a ${end.getDate()} de ${month}`;
+                    fields.semanaLabel.value = `${start.getDate()} a ${end.getDate()} de ${month}`;
                 } else {
-                    labelField.value = `${startStr} a ${endStr}`;
+                    fields.semanaLabel.value = `${startStr} a ${endStr}`;
                 }
             } else {
-                labelField.value = dateStr;
+                fields.semanaLabel.value = dateStr;
             }
             saveData(); 
         } 
@@ -71,37 +71,32 @@ function createWeek(data = null) {
     updateWeekNumbers();
 }
 
+addWeekBtn.onclick = () => {
+    createWeek();
+    saveData();
+};
+
 function updateWeekNumbers() {
     const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
     blocks.forEach((block, idx) => {
         const num = idx + 1;
         block.querySelector('.week-num').textContent = num;
+        block.querySelector('.week-num-display').textContent = num;
         
-        // Apply different colors cycling through 1-5
         block.classList.remove('color-1', 'color-2', 'color-3', 'color-4', 'color-5');
         const colorIdx = ((num - 1) % 5) + 1;
         block.classList.add(`color-${colorIdx}`);
     });
 }
 
-addWeekBtn.onclick = () => {
-    createWeek();
-    saveData();
-};
-
-// 2. Data Persistence (LocalStorage)
-const STORAGE_KEY = 'semed_planos_data_v2'; // versioned key for new model
+const STORAGE_KEY = 'semed_planos_data_v3'; // Increment version for new schema
 
 function saveData() {
     const data = {
         header: {
             componente: document.getElementById('componente').value,
-            duracao: document.getElementById('duracao').value,
-            turma: document.getElementById('turma').value,
-            turno: document.getElementById('turno').value,
-            escola: document.getElementById('escola').value,
+            ano: document.getElementById('ano').value,
             professor: document.getElementById('professor').value,
-            periodoGeral: document.getElementById('periodo-geral').value,
             logoSemed: logoSemedB64,
             logoEscola: logoEscolaB64
         },
@@ -110,15 +105,19 @@ function saveData() {
 
     weeksContainer.querySelectorAll('.week-block').forEach(block => {
         data.weeks.push({
-            label: block.querySelector('.field-semana-label').value,
-            eixo: block.querySelector('.field-eixo').value,
-            objetos: block.querySelector('.field-objetos').value,
+            eixoSocioemocional: block.querySelector('.field-eixo-socioemocional').value,
+            semanaLabel: block.querySelector('.field-semana-label').value,
+            datas: block.querySelector('.field-datas').value,
+            unidades: block.querySelector('.field-unidades').value,
+            habilidades: block.querySelector('.field-habilidades').value,
             objetivos: block.querySelector('.field-objetivos').value,
+            objetos: block.querySelector('.field-objetos').value,
             metodologia: block.querySelector('.field-metodologia').value,
             recursos: block.querySelector('.field-recursos').value,
             adaptacoes: block.querySelector('.field-adaptacoes').value,
             avaliacao: block.querySelector('.field-avaliacao').value,
-            recuperacao: block.querySelector('.field-recuperacao').value
+            recuperacao: block.querySelector('.field-recuperacao').value,
+            referencias: block.querySelector('.field-referencias').value
         });
     });
 
@@ -128,22 +127,46 @@ function saveData() {
 function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) {
-        createWeek(); // Default first week
+        // Migration check: check for v2 data
+        const oldData = localStorage.getItem('semed_planos_data_v2');
+        if (oldData) {
+            try {
+                const data = JSON.parse(oldData);
+                // Simple mapping for v2 to v3
+                if (data.header) {
+                    document.getElementById('componente').value = data.header.componente || "";
+                    document.getElementById('professor').value = data.header.professor || "";
+                }
+                if (data.weeks) {
+                    data.weeks.forEach(w => {
+                        createWeek({
+                            semanaLabel: w.label || "",
+                            unidades: w.eixo || "",
+                            objetos: w.objetos || "",
+                            objetivos: w.objetivos || "",
+                            metodologia: w.metodologia || "",
+                            recursos: w.recursos || "",
+                            adaptacoes: w.adaptacoes || "",
+                            avaliacao: w.avaliacao || "",
+                            recuperacao: w.recuperacao || ""
+                        });
+                    });
+                }
+                saveData();
+                return;
+            } catch(e) {}
+        }
+        createWeek(); 
         return;
     }
 
     try {
         const data = JSON.parse(saved);
         
-        // Populate Header
         if (data.header) {
             document.getElementById('componente').value = data.header.componente || "";
-            document.getElementById('duracao').value = data.header.duracao || "";
-            document.getElementById('turma').value = data.header.turma || "";
-            document.getElementById('turno').value = data.header.turno || "";
-            document.getElementById('escola').value = data.header.escola || "";
+            document.getElementById('ano').value = data.header.ano || "";
             document.getElementById('professor').value = data.header.professor || "";
-            document.getElementById('periodo-geral').value = data.header.periodoGeral || "";
             
             if (data.header.logoSemed) {
                 logoSemedB64 = data.header.logoSemed;
@@ -155,10 +178,8 @@ function loadData() {
             }
         }
 
-        // Populate Weeks
         weeksContainer.innerHTML = "";
         if (data.weeks && data.weeks.length > 0) {
-            // Reverse when loading because createWeek uses prepend()
             [...data.weeks].reverse().forEach(w => createWeek(w));
         } else {
             createWeek();
@@ -169,7 +190,6 @@ function loadData() {
     }
 }
 
-// Attach auto-save to header inputs
 document.querySelectorAll('.main-header input').forEach(el => {
     el.addEventListener('input', saveData);
 });
@@ -298,20 +318,14 @@ gerarPdfBtn.onclick = async () => {
 
     try {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         
-        // Data Extraction
-        const prof = document.getElementById('professor').value || '';
-        const turma = document.getElementById('turma').value || '';
-        const turno = document.getElementById('turno').value || '';
-        const duracao = document.getElementById('duracao').value || '';
-        const escola = document.getElementById('escola').value || '';
         const componente = document.getElementById('componente').value || '';
-        const periodoTxt = document.getElementById('periodo-geral').value || '';
+        const ano = document.getElementById('ano').value || '';
+        const prof = document.getElementById('professor').value || '';
         
         const sanitizeFilename = (str) => str.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
 
-        // 4. LOOP THROUGH WEEKS (ONE PER PAGE)
         const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
         const semedImgEl = document.getElementById('logo-semed');
         const escolaImgEl = document.getElementById('logo-escola');
@@ -319,96 +333,115 @@ gerarPdfBtn.onclick = async () => {
         for (let i = 0; i < blocks.length; i++) {
             if (i > 0) doc.addPage();
             const block = blocks[i];
-            const weekLabel = block.querySelector('.field-semana-label').value || '';
-
-            // --- DRAW HEADER ON EVERY PAGE ---
+            const weekNum = i + 1;
+            
+            // --- HEADER ---
             if (logoSemedB64 && semedImgEl.naturalWidth) {
                 const ratio = semedImgEl.naturalHeight / semedImgEl.naturalWidth;
-                const h = 55 * ratio;
-                doc.addImage(logoSemedB64, 'PNG', 10, 8, 55, h);
+                const w = 40;
+                const h = w * ratio;
+                doc.addImage(logoSemedB64, 'PNG', 15, 12, w, h);
             }
             if (logoEscolaB64 && escolaImgEl.naturalWidth) {
                 const ratio = escolaImgEl.naturalHeight / escolaImgEl.naturalWidth;
-                const h = 55 * ratio;
-                doc.addImage(logoEscolaB64, 'PNG', 232, 8, 55, h);
+                const w = 40;
+                const h = w * ratio;
+                doc.addImage(logoEscolaB64, 'PNG', 155, 12, w, h);
             }
             
             doc.setFont('Helvetica', 'bold');
-            doc.setFontSize(11);
-            doc.setTextColor(0);
-            doc.text('PREFEITURA MUNICIPAL DE ALTOS', 148, 12, { align: 'center' });
             doc.setFontSize(10);
-            doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED', 148, 17, { align: 'center' });
-            doc.text('COMPONENTE CURRICULAR: ' + componente.toUpperCase(), 148, 22, { align: 'center' });
-
+            doc.setTextColor(30, 58, 102);
+            doc.text('PREFEITURA MUNICIPAL DE ALTOS-PI', 105, 14, { align: 'center' });
             doc.setFontSize(9);
-            doc.text(`DURAÇÃO: ${duracao.toUpperCase()}`, 100, 30);
-            doc.text(`TURMA: ${turma.toUpperCase()}`, 145, 30);
-            doc.text(`TURNO: ${turno.toUpperCase()}`, 180, 30);
-            doc.text(`ESCOLA: ${escola.toUpperCase()}`, 15, 36);
-            doc.text(`PROFESSOR (A): ${prof.toUpperCase()}`, 15, 42);
+            doc.text('SECRETARIA MUNICIPAL DE EDUCAÇÃO-SEMED', 105, 19, { align: 'center' });
+            doc.text('COORDENAÇÃO DE ENSINO E APRENDIZAGEM', 105, 23, { align: 'center' });
 
-            // PLANO DE AULA BANNER (Use Week Specific Label)
-            doc.setFillColor(243, 232, 255); 
-            doc.setDrawColor(216, 180, 254);
-            doc.rect(15, 48, 267, 10, 'FD');
-            doc.setTextColor(88, 28, 135);
+            // Title Box
+            doc.setDrawColor(0);
+            doc.setLineWidth(0.5);
+            doc.line(15, 30, 195, 30);
+            doc.line(15, 38, 195, 38);
             doc.setFontSize(10);
-            doc.text(`- PLANO DE AULA -      ${weekLabel.toUpperCase()}`, 148, 54.5, { align: 'center' });
             doc.setTextColor(0);
+            doc.text('PLANEJAMENTO SEMANAL - 6º ao 9º ano do Ensino Fundamental', 105, 35, { align: 'center' });
 
-            // TABLE FOR THIS WEEK
-            const row = [
-                weekLabel,
-                block.querySelector('.field-eixo').value,
-                block.querySelector('.field-objetos').value,
-                block.querySelector('.field-objetivos').value,
-                block.querySelector('.field-metodologia').value,
-                block.querySelector('.field-recursos').value,
-                block.querySelector('.field-adaptacoes').value,
-                block.querySelector('.field-avaliacao').value,
-                block.querySelector('.field-recuperacao').value
+            // Info rows
+            doc.setLineWidth(0.2);
+            doc.setFontSize(8.5);
+            doc.text(`COMPONENTE CURRICULAR: ${componente.toUpperCase()}`, 15, 45);
+            doc.line(57, 46, 195, 46);
+            
+            doc.text(`ANO: ${ano.toUpperCase()}`, 15, 52);
+            doc.line(26, 53, 60, 53);
+            
+            doc.text(`PROFESSOR(A): ${prof.toUpperCase()}`, 65, 52);
+            doc.line(90, 53, 195, 53);
+
+            let currentY = 58;
+            const marginX = 15;
+            const pageWidth = 210;
+            const contentWidth = pageWidth - (marginX * 2);
+
+            const sections = [
+                { label: 'EIXO INTEGRADOR SOCIOEMOCIONAL', value: block.querySelector('.field-eixo-socioemocional').value },
+                { label: `PERÍODO: ${weekNum}ª SEMANA (${block.querySelector('.field-semana-label').value.toUpperCase()})`, value: '' },
+                { label: 'DATAS IMPORTANTES DA SEMANA', value: block.querySelector('.field-datas').value },
+                { label: 'UNIDADES TEMÁTICAS/PRÁTICAS DE LINGUAGEM/EIXO', value: block.querySelector('.field-unidades').value },
+                { label: 'HABILIDADES', value: block.querySelector('.field-habilidades').value },
+                { label: 'EXPECTATIVAS DE APRENDIZAGEM (OBJETIVOS)', value: block.querySelector('.field-objetivos').value },
+                { label: 'OBJETOS DO CONHECIMENTO / CONTEÚDO', value: block.querySelector('.field-objetos').value },
+                { label: 'ESTRATÉGIAS METODOLÓGICAS', value: block.querySelector('.field-metodologia').value },
+                { label: 'RECURSOS', value: block.querySelector('.field-recursos').value },
+                { label: 'ADAPTAÇÕES CURRICULARES', value: block.querySelector('.field-adaptacoes').value },
+                { label: 'AVALIAÇÃO DAS APRENDIZAGENS', value: block.querySelector('.field-avaliacao').value },
+                { label: 'RECUPERAÇÃO PARALELA (OBJETIVOS PRIORITÁRIOS)', value: block.querySelector('.field-recuperacao').value },
+                { label: 'REFERÊNCIAS', value: block.querySelector('.field-referencias').value }
             ];
 
-            doc.autoTable({
-                startY: 58,
-                head: [['Data', 'Eixo/\nTemática', 'Objeto do\nConhecimento', 'Objetivos', 'Estratégias\nMetodológicas', 'Recursos', 'Adaptações\nCurriculares', 'Avaliação', 'Recuperação']],
-                body: [row],
-                theme: 'grid',
-                headStyles: { 
-                    fillColor: [240, 240, 240], 
-                    textColor: 0, 
-                    fontStyle: 'bold', 
-                    halign: 'center',
-                    valign: 'middle',
-                    lineWidth: 0.1,
-                    lineColor: 0,
-                    fontSize: 8
-                },
-                styles: { 
-                    fontSize: 7.5, 
-                    cellPadding: 2, 
-                    overflow: 'linebreak',
-                    valign: 'middle',
-                    lineWidth: 0.1,
-                    lineColor: 0
-                },
-                columnStyles: { 
-                    0: { cellWidth: 22, fontStyle: 'bold', halign: 'center' },
-                    1: { cellWidth: 32 },
-                    2: { cellWidth: 32 },
-                    3: { cellWidth: 32 },
-                    4: { cellWidth: 40 },
-                    5: { cellWidth: 20 },
-                    6: { cellWidth: 25 },
-                    7: { cellWidth: 32 },
-                    8: { cellWidth: 32 }
-                },
-                margin: { horizontal: 15 }
+            sections.forEach((section) => {
+                // Check for page break
+                if (currentY > 260) {
+                    doc.addPage();
+                    currentY = 15;
+                }
+
+                // Draw Section Header (Blue)
+                doc.setFillColor(185, 233, 255);
+                doc.setDrawColor(0, 86, 179);
+                doc.rect(marginX, currentY, contentWidth, 7, 'FD');
+                doc.setTextColor(0, 86, 179);
+                doc.setFont('Helvetica', 'bold');
+                doc.setFontSize(8);
+                doc.text(section.label, 105, currentY + 4.5, { align: 'center' });
+                currentY += 7;
+
+                // Draw Value (if any)
+                if (section.value) {
+                    doc.setTextColor(0);
+                    doc.setFont('Helvetica', 'normal');
+                    const textLines = doc.splitTextToSize(section.value, contentWidth - 4);
+                    const textHeight = (textLines.length * 4) + 4;
+                    
+                    // Check if value fits on page
+                    if (currentY + textHeight > 285) {
+                        doc.addPage();
+                        currentY = 15;
+                    }
+
+                    doc.rect(marginX, currentY, contentWidth, textHeight, 'S');
+                    doc.text(textLines, marginX + 2, currentY + 5);
+                    currentY += textHeight;
+                } else {
+                    // Empty box for PERÍODO or if value is empty
+                    doc.rect(marginX, currentY, contentWidth, 8, 'S');
+                    currentY += 8;
+                }
+                currentY += 1; // small gap
             });
         }
 
-        const fileName = `PLANO_DE_AULA_TURMA_${sanitizeFilename(turma)}_${sanitizeFilename(prof)}.pdf`;
+        const fileName = `PLANO_DE_AULA_V3_${sanitizeFilename(prof)}.pdf`;
         doc.save(fileName);
     } catch (e) {
         console.error(e);
@@ -423,62 +456,95 @@ gerarPdfBtn.onclick = async () => {
 const gerarWordBtn = document.getElementById('gerar-word-btn');
 gerarWordBtn.onclick = () => {
     const prof = document.getElementById('professor').value || '/';
-    const escola = document.getElementById('escola').value || '/';
+    const componente = document.getElementById('componente').value || '/';
+    const ano = document.getElementById('ano').value || '/';
     const sanitizeFilename = (str) => str.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
     const blocks = Array.from(weeksContainer.querySelectorAll('.week-block')).reverse();
 
     let html = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
         <head><meta charset='utf-8'><style>
-            table { border-collapse: collapse; width: 100%; border: 1px solid black; } 
-            th, td { border: 1px solid black; padding: 5px; font-family: Arial; font-size: 9pt; vertical-align: middle; }
-            th { background-color: #f0f0f0; font-weight: bold; text-align: center; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; } 
+            th, td { border: 1px solid black; padding: 8px; font-family: Arial; font-size: 10pt; }
+            th { background-color: #b9e9ff; color: #0056b3; font-weight: bold; text-align: center; text-transform: uppercase; }
             .page-break { page-break-before: always; }
-            .banner { text-align:center; border: 1px solid black; padding: 5px; background-color: #f3e8ff; font-weight: bold; margin: 10px 0; }
+            .header-info { margin-bottom: 20px; }
+            .title { text-align: center; font-weight: bold; font-size: 14pt; margin: 10px 0; border-top: 2px solid black; border-bottom: 2px solid black; padding: 5px 0; }
         </style></head>
-        <body style="mso-page-orientation: landscape;">
+        <body>
     `;
 
     blocks.forEach((block, idx) => {
-        const weekLabel = block.querySelector('.field-semana-label').value || '';
-        const row = [
-            weekLabel,
-            block.querySelector('.field-eixo').value,
-            block.querySelector('.field-objetos').value,
-            block.querySelector('.field-objetivos').value,
-            block.querySelector('.field-metodologia').value,
-            block.querySelector('.field-recursos').value,
-            block.querySelector('.field-adaptacoes').value,
-            block.querySelector('.field-avaliacao').value,
-            block.querySelector('.field-recuperacao').value
-        ];
-
         if (idx > 0) html += `<div class="page-break"></div>`;
 
+        const weekNum = idx + 1;
+        const data = {
+            eixoSocioemocional: block.querySelector('.field-eixo-socioemocional').value,
+            semanaLabel: block.querySelector('.field-semana-label').value,
+            datas: block.querySelector('.field-datas').value,
+            unidades: block.querySelector('.field-unidades').value,
+            habilidades: block.querySelector('.field-habilidades').value,
+            objetivos: block.querySelector('.field-objetivos').value,
+            objetos: block.querySelector('.field-objetos').value,
+            metodologia: block.querySelector('.field-metodologia').value,
+            recursos: block.querySelector('.field-recursos').value,
+            adaptacoes: block.querySelector('.field-adaptacoes').value,
+            avaliacao: block.querySelector('.field-avaliacao').value,
+            recuperacao: block.querySelector('.field-recuperacao').value,
+            referencias: block.querySelector('.field-referencias').value
+        };
+
         html += `
-            <h2 style="text-align:center">PREFEITURA MUNICIPAL DE ALTOS</h2>
-            <h3 style="text-align:center">SECRETARIA MUNICIPAL DE EDUCAÇÃO – SEMED</h3>
-            <p><b>ESCOLA:</b> ${escola} | <b>PROFESSOR:</b> ${prof}</p>
-            <div class="banner">- PLANO DE AULA - ${weekLabel.toUpperCase()}</div>
+            <h2 style="text-align:center; font-size: 12pt; margin: 0;">PREFEITURA MUNICIPAL DE ALTOS-PI</h2>
+            <h3 style="text-align:center; font-size: 11pt; margin: 0;">SECRETARIA MUNICIPAL DE EDUCAÇÃO-SEMED</h3>
+            <h3 style="text-align:center; font-size: 11pt; margin: 0;">COORDENAÇÃO DE ENSINO E APRENDIZAGEM</h3>
+            
+            <div class="title">PLANEJAMENTO SEMANAL - 6º ao 9º ano do Ensino Fundamental</div>
+            
+            <div class="header-info">
+                <p><b>COMPONENTE CURRICULAR:</b> ${componente.toUpperCase()}</p>
+                <p><b>ANO:</b> ${ano.toUpperCase()} &nbsp;&nbsp;&nbsp; <b>PROFESSOR(A):</b> ${prof.toUpperCase()}</p>
+            </div>
+
             <table>
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Eixo/Temática</th>
-                        <th>Objeto do Conhecimento</th>
-                        <th>Objetivos</th>
-                        <th>Estratégias Metodológicas</th>
-                        <th>Recursos</th>
-                        <th>Adaptações Curriculares</th>
-                        <th>Avaliação</th>
-                        <th>Recuperação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        ${row.map(c => `<td>${c.replace(/\n/g, '<br>')}</td>`).join('')}
-                    </tr>
-                </tbody>
+                <tr><th>EIXO INTEGRADOR SOCIOEMOCIONAL</th></tr>
+                <tr><td>${data.eixoSocioemocional.replace(/\n/g, '<br>')}</td></tr>
+                
+                <tr><th>PERÍODO: ${weekNum}ª SEMANA (${data.semanaLabel.toUpperCase()})</th></tr>
+                <tr><td>&nbsp;</td></tr>
+
+                <tr><th>DATAS IMPORTANTES DA SEMANA</th></tr>
+                <tr><td>${data.datas.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>UNIDADES TEMÁTICAS/PRÁTICAS DE LINGUAGEM/EIXO</th></tr>
+                <tr><td>${data.unidades.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>HABILIDADES</th></tr>
+                <tr><td>${data.habilidades.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>EXPECTATIVAS DE APRENDIZAGEM (OBJETIVOS)</th></tr>
+                <tr><td>${data.objetivos.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>OBJETOS DO CONHECIMENTO / CONTEÚDO</th></tr>
+                <tr><td>${data.objetos.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>ESTRATÉGIAS METODOLÓGICAS</th></tr>
+                <tr><td>${data.metodologia.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>RECURSOS</th></tr>
+                <tr><td>${data.recursos.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>ADAPTAÇÕES CURRICULARES</th></tr>
+                <tr><td>${data.adaptacoes.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>AVALIAÇÃO DAS APRENDIZAGENS</th></tr>
+                <tr><td>${data.avaliacao.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>RECUPERAÇÃO PARALELA (OBJETIVOS PRIORITÁRIOS)</th></tr>
+                <tr><td>${data.recuperacao.replace(/\n/g, '<br>')}</td></tr>
+
+                <tr><th>REFERÊNCIAS</th></tr>
+                <tr><td>${data.referencias.replace(/\n/g, '<br>')}</td></tr>
             </table>
         `;
     });
@@ -488,11 +554,11 @@ gerarWordBtn.onclick = () => {
     const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    const turma = document.getElementById('turma').value || '';
-    const fileName = `PLANO_DE_AULA_TURMA_${sanitizeFilename(turma)}_${sanitizeFilename(prof)}.doc`;
+    const fileName = `PLANO_DE_AULA_V3_${sanitizeFilename(prof)}.doc`;
     link.download = fileName;
     link.click();
 };
+
 
 // 7. Floating Buttons
 document.getElementById('float-pdf-btn').onclick = () => document.getElementById('gerar-pdf-btn').click();
@@ -513,13 +579,15 @@ gerarResumoBtn.onclick = () => {
     let summaryText = "";
     blocks.forEach((block) => {
         const period = block.querySelector('.field-semana-label').value.trim() || "Período não definido";
+        const unidades = block.querySelector('.field-unidades').value.trim();
         const objetos = block.querySelector('.field-objetos').value.trim();
         const metodologia = block.querySelector('.field-metodologia').value.trim();
 
-        if (objetos || metodologia) {
+        if (unidades || objetos || metodologia) {
             summaryText += `---------------------------\nPERÍODO: ${period.toUpperCase()}\n---------------------------\n`;
-            if (objetos) summaryText += objetos + "\n\n";
-            if (metodologia) summaryText += metodologia + "\n\n";
+            if (unidades) summaryText += "UNIDADES: " + unidades + "\n\n";
+            if (objetos) summaryText += "OBJETOS: " + objetos + "\n\n";
+            if (metodologia) summaryText += "METODOLOGIA: " + metodologia + "\n\n";
         }
     });
 
